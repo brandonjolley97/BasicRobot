@@ -28,6 +28,8 @@ public class BotController
 	{
 		LCD.drawString(message, xPosition, yPosition);
 		Delay.msDelay(waitTime);
+		
+		
 		sillyBot.driveRoom();
 	}
 	
