@@ -3,9 +3,9 @@ package bot.model;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.Motor;
-import lejos.hardware.port.port;
-import lejos.hardware.chassis.Wheel;
-import lejos.hardware.chassis.WheelChassis;
+import lejos.hardware.port.Port;
+import lejos.robotics.chassis.Wheel;
+import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.navigation.MovePilot;
 import lejos.utility.Delay;
 import lejos.hardware.sensor.EV3TouchSensor;
@@ -31,15 +31,16 @@ public class EV3Bot
 		this.yPosition = 50;
 		this.waitTime = 4000;
 		
-		distanceSensor = 
+		distanceSensor = new EV3UltrasonicSensor(LocalEV3);
 	}
 	
 	private void setupPilot()
 	{
-		//
-		//
-		//
-		//
+		Wheel leftWheel = WheeledChassis.modelWheel(Motor.A, 43.3).offset(-72);
+		Wheel rightWheel = WheeledChassis.modelWheel(Motor.A, 43.3).offset(-72);
+		WheeledChassis chassis = new WheeledChassis(new Wheel[]{leftWheel, rightWheel}, WheeledChassis.TYPE_DIFFERENTIAL);
+		botPilot = new MovePilot(chassis);
+		
 		
 		
 	}
@@ -47,6 +48,18 @@ public class EV3Bot
 	public void driveRoom()
 	{
 		//call private helper method here
+		
+		ultrasonicSamples = new float [distanceSensor.sampleSize()];
+		distanceSensor.fetchSample(ultrasonicSamples, 0);
+		if(ultrasonicSamples[0] < 2.5)
+		{
+			botPilot.travel(20.00);
+		}
+		else
+		{
+			botPilot.travel(254.00);
+		}
+		
 		displayMessage("driveRoom");
 	}
 	
@@ -61,7 +74,7 @@ public class EV3Bot
 	private void displayMessage(String message)
 	{
 		LCD.drawString(message, xPosition, yPosition);
-		LCD.msDelay(waitTime);
+		Delay.msDelay(waitTime);
 	}
 	
 }
