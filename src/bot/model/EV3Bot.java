@@ -19,10 +19,12 @@ public class EV3Bot
 	private int xPosition;
 	private int yPosition;
 	private long waitTime;
-	
 	private MovePilot botPilot;
 	private EV3UltrasonicSensor distanceSensor;
-	private EV3TouchSensor backTouch;
+	//private EV3TouchSensor backTouch;
+	
+	private float [] ultrasonicSamples;
+	//private float [] touchSamples;
 	
 	public EV3Bot()
 	{
@@ -31,13 +33,14 @@ public class EV3Bot
 		this.yPosition = 50;
 		this.waitTime = 4000;
 		
-		distanceSensor = new EV3UltrasonicSensor(LocalEV3);
+		distanceSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		setupPilot();
 	}
 	
 	private void setupPilot()
 	{
 		Wheel leftWheel = WheeledChassis.modelWheel(Motor.A, 43.3).offset(-72);
-		Wheel rightWheel = WheeledChassis.modelWheel(Motor.A, 43.3).offset(-72);
+		Wheel rightWheel = WheeledChassis.modelWheel(Motor.A, 43.3).offset(72);
 		WheeledChassis chassis = new WheeledChassis(new Wheel[]{leftWheel, rightWheel}, WheeledChassis.TYPE_DIFFERENTIAL);
 		botPilot = new MovePilot(chassis);
 		
@@ -51,16 +54,38 @@ public class EV3Bot
 		
 		ultrasonicSamples = new float [distanceSensor.sampleSize()];
 		distanceSensor.fetchSample(ultrasonicSamples, 0);
-		if(ultrasonicSamples[0] < 2.5)
+		if(ultrasonicSamples[0] < 20)
 		{
-			botPilot.travel(20.00);
+			driveLong();
 		}
 		else
 		{
-			botPilot.travel(254.00);
+			driveShort();
 		}
 		
 		displayMessage("driveRoom");
+	}
+	
+	public void driveShort()
+	{
+		botPilot.travel(1048);
+		botPilot.rotate(60);
+		botPilot.travel(3048);
+		botPilot.rotate(-60);
+		botPilot.travel(5588);
+		botPilot.rotate(60);
+		botPilot.travel(3810);
+	}
+	
+	public void driveLong()
+	{
+		botPilot.travel(3810);
+		botPilot.rotate(-60);
+		botPilot.travel(5588);
+		botPilot.rotate(60);
+		botPilot.travel(3048);
+		botPilot.rotate(-60);
+		botPilot.travel(1048);
 	}
 	
 	private void dislayMessage()
